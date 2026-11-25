@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5c4d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>البحث عن الأسعار</title>
+<style>
+:root{--bg:#f6f5f1;--surface:#fff;--ink:#1c1b18;--mute:#6b6a63;--line:#e2e0d8;--acc:#0f5c4d;--acc-ink:#fff;--danger:#b3261e;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141412;--surface:#1d1d1a;--ink:#eeede8;--mute:#9a988f;--line:#2e2d29;--acc:#4fb39c;--acc-ink:#0b1d18;--danger:#f2877e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141412;--surface:#1d1d1a;--ink:#eeede8;--mute:#9a988f;--line:#2e2d29;--acc:#4fb39c;--acc-ink:#0b1d18;--danger:#f2877e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Cairo","Segoe UI",Tahoma,system-ui,sans-serif;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 40px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);padding:14px 0 10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+h1{font-size:1.15rem;margin:0;font-weight:700}
+.top .tools{display:flex;gap:8px;align-items:center}
+.cur{width:64px;text-align:center}
+input,select,textarea,button{font:inherit;color:inherit}
+input,textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+input:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+.search{font-size:1.15rem;padding:13px 16px;border-radius:14px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+.btn.del{color:var(--danger)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:4px 12px;cursor:pointer;white-space:nowrap;font-size:.9rem;color:var(--mute)}
+.chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.count{color:var(--mute);font-size:.85rem;margin:6px 2px}
+.row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.info{flex:1;min-width:0}
+.name{font-weight:600;overflow-wrap:anywhere}
+.meta{color:var(--mute);font-size:.82rem;display:flex;gap:10px;flex-wrap:wrap}
+.price{text-align:left;direction:ltr;white-space:nowrap}
+.price b{font-size:1.35rem;font-variant-numeric:tabular-nums;color:var(--acc)}
+.price small{color:var(--mute);margin-inline-start:4px}
+.edit{background:none;border:0;color:var(--mute);cursor:pointer;font-size:.8rem;padding:4px 2px;text-decoration:underline}
+.empty{text-align:center;color:var(--mute);padding:36px 10px}
+.empty .btn{margin-top:12px}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);width:min(520px,calc(100vw - 24px));padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h2{margin:0 0 12px;font-size:1.05rem}
+label{display:block;font-size:.85rem;color:var(--mute);margin:10px 0 4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.actions .sp{flex:1}
+textarea{min-height:200px;direction:ltr;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem}
+.hint{color:var(--mute);font-size:.82rem;margin:0 0 8px}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline:0;margin:auto;width:max-content;max-width:90vw;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+#toast.on{opacity:1}
+
+[hidden]{display:none!important}
+input[type=checkbox]{width:auto;margin-inline-end:8px}
+.chk{display:flex;align-items:center;color:var(--ink);font-size:.95rem;margin:6px 0}
+h3{font-size:.9rem;margin:16px 0 6px;color:var(--acc)}
+.st{color:var(--mute);font-size:.75rem;margin-top:2px}
+#bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--acc);border-radius:12px;padding:10px 12px;margin:6px 0;font-size:.9rem}
+#bar span{flex:1;min-width:160px}
+dialog{max-height:calc(100dvh - 24px);overflow:auto}
+textarea{min-height:130px}
+.more{display:block;margin:10px auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div><h1>قائمة الأسعار</h1><div class="st" id="st"></div></div>
+      <div class="tools">
+        <button class="btn" id="bInst" type="button" hidden>تثبيت</button>
+        <button class="btn pri" id="bAdd" type="button" hidden>صنف جديد</button>
+        <button class="btn" id="bData" type="button">الإدارة</button>
+      </div>
+    </div>
+    <input id="q" class="search" type="search" placeholder="ابحث بالاسم أو الكود أو الفئة" autocomplete="off" enterkeyhint="search">
+    <div class="chips" id="chips"></div>
+  </header>
+  <div id="bar" hidden></div>
+  <div class="count" id="count"></div>
+  <main id="list"></main>
+</div>
+
+<dialog id="dForm">
+  <h2 id="fTitle">صنف</h2>
+  <label for="fName">اسم الصنف</label>
+  <input id="fName" autocomplete="off">
+  <div class="grid">
+    <div><label for="fPrice">السعر</label><input id="fPrice" inputmode="decimal" autocomplete="off"></div>
+    <div><label for="fCode">الكود (اختياري)</label><input id="fCode" autocomplete="off"></div>
+  </div>
+  <label for="fCat">الفئة (اختياري)</label>
+  <input id="fCat" list="cats" autocomplete="off">
+  <datalist id="cats"></datalist>
+  <div class="actions">
+    <button class="btn pri" id="fSave" type="button">حفظ</button>
+    <button class="btn" id="fCancel" type="button">إلغاء</button>
+    <span class="sp"></span>
+    <button class="btn del" id="fDel" type="button">حذف</button>
+  </div>
+</dialog>
+
+<dialog id="dData">
+  <h2>الإدارة</h2>
+  <h3>المزامنة</h3>
+  <p class="hint">تتحدث الأسعار تلقائياً من ملف prices.json عند توفر الإنترنت، ثم تعمل بدون اتصال. يمكنك أيضاً استلام الملف عبر واتساب واستيراده يدوياً.</p>
+  <div class="actions">
+    <button class="btn pri" id="dSync" type="button">تحديث الآن</button>
+    <button class="btn" id="dShare" type="button">مشاركة prices.json</button>
+    <button class="btn" id="dDl" type="button">تنزيل prices.json</button>
+    <label class="btn" style="margin:0;color:var(--ink)">استيراد prices.json<input id="jFile" type="file" accept=".json,application/json" hidden></label>
+  </div>
+  <h3>التعديل</h3>
+  <label class="chk"><input type="checkbox" id="tEdit">تفعيل وضع التعديل على هذا الجهاز</label>
+  <label for="cur">العملة</label>
+  <input id="cur" maxlength="8">
+  <h3>Excel / CSV</h3>
+  <p class="hint">الترتيب: الاسم، السعر، الكود، الفئة. الكود والفئة اختياريان. الصق من Excel مباشرة أو افتح ملف CSV.</p>
+  <textarea id="csv" spellcheck="false"></textarea>
+  <div class="actions">
+    <button class="btn pri" id="dReplace" type="button">استبدال الكل</button>
+    <button class="btn" id="dAppend" type="button">إضافة للموجود</button>
+    <button class="btn" id="dCopy" type="button">نسخ</button>
+    <label class="btn" style="margin:0;color:var(--ink)">فتح CSV<input id="dFile" type="file" accept=".csv,.tsv,.txt" hidden></label>
+  </div>
+  <p class="hint">آيفون: من زر المشاركة في سفاري اختر "إضافة إلى الشاشة الرئيسية" لتثبيت التطبيق.</p>
+  <div class="actions"><button class="btn" id="dClose" type="button">إغلاق</button></div>
+</dialog>
+<div id="toast" role="status"></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function norm(s){return String(s==null?'':s).toLowerCase()
+  .replace(/[\u064B-\u065F\u0670\u0640]/g,'')
+  .replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+  .replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-1776)
+  .replace(/\s+/g,' ').trim()}
+function num(v){const n=parseFloat(norm(v).replace(/[,٬\s]/g,'').replace('٫','.'));return isFinite(n)?n:NaN}
+const fmt=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(n);
+const when=u=>{const d=new Date(u);return isNaN(d)?'':d.toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})};
+const col=new Intl.Collator('ar').compare;
+const mk=r=>({id:uid(),name:String(r[0]).trim(),price:num(r[1]),code:r[2]||'',cat:r[3]||''});
+
+/* local storage on the device (IndexedDB) */
+const idb=new Promise((res,rej)=>{const r=indexedDB.open('priceLookup',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const kv=(m,k,v)=>idb.then(db=>new Promise((res,rej)=>{const s=db.transaction('kv',m==='get'?'readonly':'readwrite').objectStore('kv'),q=m==='get'?s.get(k):s.put(v,k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}));
+
+let D={updated:'',cur:'ج.س',items:[],dirty:false},cat='',editId=null,edit=false,lim=100,lastPull=0;const K=new Map();
+const key=i=>{let v=K.get(i.id);if(v==null){v=norm(i.name+' '+i.code+' '+i.cat);K.set(i.id,v)}return v};
+const sortItems=()=>D.items.sort((a,b)=>col(a.name,b.name));
+const persist=()=>{K.clear();return kv('set','data',D).catch(()=>toast('تعذر الحفظ على هذا الجهاز'))};
+const touch=()=>{D.updated=new Date().toISOString();D.dirty=true;sortItems();persist();render();status()};
+function apply(n){D={updated:n.updated,cur:n.cur,items:n.items,dirty:false};sortItems();persist();$('#cur').value=D.cur;render();status()}
+function clean(j){
+  if(!j||!Array.isArray(j.items))throw new Error('format');
+  const items=j.items.map(r=>({id:String(r.id||uid()),name:String(r.name||'').trim(),price:num(r.price),code:String(r.code||'').trim(),cat:String(r.cat||'').trim()})).filter(i=>i.name&&isFinite(i.price)&&i.price>=0);
+  if(j.items.length&&!items.length)throw new Error('empty');
+  return{updated:j.updated&&!isNaN(Date.parse(j.updated))?j.updated:new Date().toISOString(),cur:j.currency||j.cur||'ج.س',items}}
+const toJSON=()=>'{\n"updated":'+JSON.stringify(D.updated||new Date().toISOString())+',\n"currency":'+JSON.stringify(D.cur)+',\n"items":[\n'+D.items.map(i=>JSON.stringify(i)).join(',\n')+'\n]\n}\n';
+
+/* ui helpers */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2200)}
+function bar(msg,acts){const b=$('#bar');if(!msg){b.hidden=true;return}b.innerHTML='<span></span>';b.firstChild.textContent=msg;(acts||[]).forEach(([l,f])=>{const x=document.createElement('button');x.type='button';x.className='btn';x.textContent=l;x.onclick=()=>{bar();f()};b.append(x)});b.hidden=false}
+function status(){$('#st').textContent=(D.updated?'آخر تحديث: '+when(D.updated):'لا توجد بيانات')+' · '+(navigator.onLine?'متصل':'يعمل بدون إنترنت')+(edit?' · وضع التعديل':'')+(D.dirty?' · تعديلات غير مُصدَّرة':'')}
+function score(i,q){const k=key(i);return(i.code&&norm(i.code)===q?3:0)+(k.startsWith(q)?2:0)+(k.includes(q)?1:0)}
+
+function render(){
+  const q=norm($('#q').value),terms=q?q.split(' '):[];
+  if(cat&&!D.items.some(i=>i.cat===cat))cat='';
+  let list=D.items.filter(i=>(!cat||i.cat===cat)&&terms.every(t=>key(i).includes(t)));
+  if(q)list=list.map(i=>[score(i,q),i]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
+  const cats=[...new Set(D.items.map(i=>i.cat).filter(Boolean))].sort(col);
+  $('#chips').innerHTML=cats.length?['',...cats].map(c=>`<button type="button" class="chip" data-cat="${esc(c)}" aria-pressed="${c===cat}">${c?esc(c):'الكل'}</button>`).join(''):'';
+  $('#cats').innerHTML=cats.map(c=>`<option value="${esc(c)}">`).join('');
+  $('#count').textContent=D.items.length?`${list.length} من ${D.items.length} صنف`:'';
+  if(!list.length){
+    $('#list').innerHTML=D.items.length
+      ?`<div class="empty">لا يوجد صنف مطابق للبحث${edit?'<br><button class="btn pri" data-new="1" type="button">إضافة صنف بهذا الاسم</button>':''}</div>`
+      :'<div class="empty">لا توجد بيانات على هذا الجهاز.<br>اتصل بالإنترنت مرة واحدة لتحميل الأسعار، أو استورد ملف prices.json من زر الإدارة.</div>';
+    return}
+  const cur=esc(D.cur||'');
+  $('#list').innerHTML=list.slice(0,lim).map(i=>`<div class="row"><div class="info"><div class="name">${esc(i.name)}</div><div class="meta">${i.code?`<span dir="ltr">${esc(i.code)}</span>`:''}${i.cat?`<span>${esc(i.cat)}</span>`:''}${edit?`<button class="edit" data-edit="${esc(i.id)}" type="button">تعديل</button>`:''}</div></div><div class="price"><b>${fmt(i.price)}</b><small>${cur}</small></div></div>`).join('')
+    +(list.length>lim?`<button class="btn more" data-more="1" type="button">عرض المزيد (${list.length-lim})</button>`:'');
+}
+
+/* sync with prices.json on the server */
+async function pull(manual){
+  lastPull=Date.now();
+  try{
+    const r=await fetch('prices.json',{cache:'no-store'});if(!r.ok)throw new Error('http');
+    const n=clean(await r.json());
+    if(!D.updated||Date.parse(n.updated)>Date.parse(D.updated)){
+      if(D.dirty)bar('يوجد تحديث جديد من السيرفر، لكن لديك تعديلات لم تُصدَّر من هذا الجهاز.',[['اعتماد السيرفر',()=>{apply(n);toast('تم التحديث')}],['الاحتفاظ بتعديلاتي',()=>{}]]);
+      else{apply(n);toast('تم تحديث الأسعار')}
+    }else if(manual)toast('الأسعار محدّثة');
+  }catch(e){if(manual)toast(navigator.onLine?'تعذر تحميل ملف الأسعار':'لا يوجد اتصال بالإنترنت')}
+}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+const exported=()=>{D.dirty=false;persist();status()};
+async function shareJSON(){
+  const t=toJSON(),f=new File([t],'prices.json',{type:'application/json'});
+  try{if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'قائمة الأسعار'});exported();return}}catch(e){if(e.name==='AbortError')return}
+  download('prices.json',t,'application/json');exported();toast('تم تنزيل prices.json')}
+
+/* csv */
+function splitLine(l,d){const o=[];let c='',q=false;for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"'){if(q&&l[i+1]==='"'){c+='"';i++}else q=!q}else if(ch===d&&!q){o.push(c);c=''}else c+=ch}o.push(c);return o.map(s=>s.trim())}
+function parseCSV(t){
+  const lines=t.split(/\r?\n/).filter(l=>l.trim());const out=[];if(!lines.length)return out;
+  const f=lines[0],d=f.includes('\t')?'\t':(f.includes(';')&&!f.includes(',')?';':',');
+  lines.forEach((l,ix)=>{const r=splitLine(l,d);if(!r[0]||!isFinite(num(r[1]))){if(ix>0)out.bad=(out.bad||0)+1;return}out.push(mk(r))});
+  return out}
+const q1=v=>/[",\n\t]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+const toCSV=()=>['الاسم,السعر,الكود,الفئة',...D.items.map(i=>[i.name,i.price,i.code,i.cat].map(x=>q1(String(x))).join(','))].join('\n');
+function importCSV(replace){
+  const rows=parseCSV($('#csv').value);
+  if(!rows.length){toast('لا توجد صفوف صالحة');return}
+  if(replace&&!confirm('سيتم استبدال كل الأصناف الحالية. متابعة؟'))return;
+  D.items=replace?rows:D.items.concat(rows);touch();
+  toast(`تم استيراد ${rows.length} صنف`+(rows.bad?` وتخطي ${rows.bad}`:''));$('#csv').value=toCSV()}
+
+/* item form */
+const dForm=$('#dForm'),dData=$('#dData');
+function openForm(item,prefill){
+  editId=item?item.id:null;
+  $('#fTitle').textContent=item?'تعديل صنف':'صنف جديد';
+  $('#fName').value=item?item.name:(prefill||'');
+  $('#fPrice').value=item?item.price:'';
+  $('#fCode').value=item?item.code:'';
+  $('#fCat').value=item?item.cat:cat;
+  $('#fDel').style.display=item?'':'none';
+  dForm.showModal();setTimeout(()=>$(item||prefill?'#fPrice':'#fName').focus(),30)}
+function saveForm(){
+  const name=$('#fName').value.trim(),price=num($('#fPrice').value);
+  if(!name){toast('اكتب اسم الصنف');return}
+  if(!isFinite(price)||price<0){toast('السعر غير صحيح');return}
+  const rec={name,price,code:$('#fCode').value.trim(),cat:$('#fCat').value.trim()};
+  if(editId)Object.assign(D.items.find(i=>i.id===editId),rec);else D.items.push({id:uid(),...rec});
+  touch();dForm.close();toast('تم الحفظ')}
+
+/* events */
+let st;$('#q').addEventListener('input',()=>{lim=100;clearTimeout(st);st=setTimeout(render,60)});
+$('#q').addEventListener('keydown',e=>{if(e.key==='Escape'){e.target.value='';render()}if(e.key==='Enter')e.target.blur()});
+document.addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&!document.querySelector('dialog[open]')){e.preventDefault();$('#q').focus()}});
+$('#chips').addEventListener('click',e=>{const b=e.target.closest('[data-cat]');if(b){cat=b.dataset.cat===cat?'':b.dataset.cat;lim=100;render()}});
+$('#list').addEventListener('click',e=>{
+  const ed=e.target.closest('[data-edit]');if(ed){openForm(D.items.find(i=>i.id===ed.dataset.edit));return}
+  if(e.target.closest('[data-more]')){lim+=100;render();return}
+  if(e.target.closest('[data-new]'))openForm(null,$('#q').value.trim())});
+$('#bAdd').onclick=()=>openForm(null);
+$('#fSave').onclick=saveForm;$('#fCancel').onclick=()=>dForm.close();
+dForm.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();saveForm()}});
+$('#fDel').onclick=()=>{if(confirm('حذف هذا الصنف؟')){D.items=D.items.filter(i=>i.id!==editId);touch();dForm.close();toast('تم الحذف')}};
+$('#bData').onclick=()=>{$('#csv').value=toCSV();$('#tEdit').checked=edit;$('#cur').value=D.cur;dData.showModal()};
+$('#dClose').onclick=()=>dData.close();
+$('#dSync').onclick=()=>pull(true);
+$('#dShare').onclick=shareJSON;
+$('#dDl').onclick=()=>{download('prices.json',toJSON(),'application/json');exported();toast('تم تنزيل prices.json')};
+$('#jFile').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const n=clean(JSON.parse((await f.text()).replace(/^\uFEFF/,'')));
+    const older=D.updated&&Date.parse(n.updated)<Date.parse(D.updated);
+    if(!confirm(`استيراد ${n.items.length} صنف (تاريخ الملف: ${when(n.updated)}).`+(older?'\nتنبيه: هذا الملف أقدم من البيانات الحالية.':'')+'\nسيتم استبدال البيانات الحالية. متابعة؟'))return;
+    apply(n);dData.close();toast('تم الاستيراد')
+  }catch(err){toast('ملف غير صالح')}};
+$('#tEdit').onchange=e=>{edit=e.target.checked;$('#bAdd').hidden=!edit;render();status();if(edit)dData.close()};
+$('#cur').onchange=e=>{D.cur=e.target.value.trim()||'ج.س';touch()};
+$('#dReplace').onclick=()=>importCSV(true);$('#dAppend').onclick=()=>importCSV(false);
+$('#dCopy').onclick=async()=>{const t=$('#csv');t.select();try{await navigator.clipboard.writeText(t.value)}catch(e){try{document.execCommand('copy')}catch(_){}}toast('تم النسخ')};
+$('#dFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#csv').value=String(r.result).replace(/^\uFEFF/,'')};r.readAsText(f,'utf-8');e.target.value=''};
+
+/* install, connectivity, service worker */
+let ip;addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;$('#bInst').hidden=false});
+$('#bInst').onclick=async()=>{if(!ip)return;ip.prompt();await ip.userChoice;ip=null;$('#bInst').hidden=true};
+addEventListener('appinstalled',()=>{$('#bInst').hidden=true});
+addEventListener('online',()=>{status();pull()});addEventListener('offline',status);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPull>3e5)pull()});
+if('serviceWorker' in navigator){
+  const had=navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had)bar('تم تحديث التطبيق إلى نسخة جديدة.',[['إعادة التحميل',()=>location.reload()]])})}
+
+(async()=>{
+  try{const s=await kv('get','data');if(s&&Array.isArray(s.items))D=s}catch(e){}
+  $('#cur').value=D.cur;render();status();$('#q').focus();pull();
+  if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+})();
+})();
+</script>
+</body>
+</html>
