@@ -1,4 +1,4 @@
-const V = 'price-lookup-v6';
+const V = 'price-lookup-v7';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'prices.json'];
 
 self.addEventListener('install', e => {
