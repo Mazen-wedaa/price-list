@@ -195,12 +195,18 @@ function render(){
 }
 
 /* sync with prices.json on the server */
+function sameData(a,b){
+  const rows=x=>(x.items||[]).map(i=>[String(i.name||''),Number(i.price),String(i.code||''),String(i.cat||'')]);
+  return a.cur===b.cur&&JSON.stringify(rows(a))===JSON.stringify(rows(b));
+}
 async function pull(manual){
   lastPull=Date.now();
   try{
     const r=await fetch('prices.json',{cache:'no-store'});if(!r.ok)throw new Error('http');
     const n=clean(await r.json());
-    if(!D.updated||Date.parse(n.updated)>Date.parse(D.updated)){
+    const changed=!sameData(D,n);
+    const newer=!D.updated||Date.parse(n.updated)>Date.parse(D.updated);
+    if(changed&&(newer||manual||!D.updated)){
       if(D.dirty)bar('يوجد تحديث جديد من السيرفر، لكن لديك تعديلات لم تُصدَّر من هذا الجهاز.',[['اعتماد السيرفر',()=>{apply(n);toast('تم التحديث')}],['الاحتفاظ بتعديلاتي',()=>{}]]);
       else{apply(n);toast('تم تحديث الأسعار')}
     }else if(manual)toast('الأسعار محدّثة');
